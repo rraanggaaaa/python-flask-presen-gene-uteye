@@ -1,18 +1,25 @@
-from flask import Flask, render_template, send_from_directory
-from gevent.pywsgi import WSGIServer
-import os
+import json
+from flask import Flask, render_template, jsonify, request
+import datetime
 
 app = Flask(__name__)
+app.secret_key = "generate-presensi"
 
-@app.route('/')
+@app.route('/', methods=['GET'])
 def index():
-    return render_template('index.html')
+    with open('matkul.json') as f:
+        data = list(json.load(f))
+    
+    waktu_saat_ini = datetime.datetime.now()
 
-@app.route('/favicon.ico')
-def favicon():
-    return send_from_directory(os.path.join(app.root_path, 'static'),
-                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
+    #Untuk menyesuaikan waktu Indonesia Barat
+    waktu_indonesia_barat = waktu_saat_ini - datetime.timedelta(hours=7)
 
-if __name__ == "__main__":
-    http_server = WSGIServer(('0.0.0.0', 5000), app)
-    http_server.serve_forever()
+    #Untuk menampilkan hasil
+    waktu = waktu_indonesia_barat.date()
+        
+    return render_template("index2.html",data=data, waktu=waktu)
+    
+
+if '__name__' == '__main__':
+    app.run(host='127.0.0.1', port='8080', debug=True)
